@@ -27,7 +27,7 @@ class App:
         self.root.title("Employee Onboarding")
         self.root.geometry("500x500")
         self.root.configure(bg='#B2AC88')  # Set background color to sage green
-        self.current_employee_id = None  # Set employee ID for search/edit
+        self.employee_id = None  # Set employee ID for search/edit
 
         # Define a custom font style for the application
         custom_font = ("Times New Roman", 10)  # Example: Using Times New Roman
@@ -74,20 +74,24 @@ class App:
         }
 
         # Confirm Button
-        self.confirm_button = tk.Button(root, text="Confirm", command=self.confirm, bg='#B2AC88', font=custom_font)
-        self.confirm_button.pack(anchor='w', padx=10, pady=10)
+        self.confirm_button = tk.Button(root, text="Create Record", command=self.confirm, bg='#B2AC88', font=custom_font)
+        self.confirm_button.pack(anchor='w', padx=12, pady=10)
 
         # Search button
-        self.search_button = tk.Button(root, text="Search", command=self.read_records, bg='#B2AC88', font=custom_font)
-        self.search_button.pack(anchor='w', padx=10, pady=5)
+        self.search_button = tk.Button(root, text="Search Records", command=self.read_records, bg='#B2AC88', font=custom_font)
+        self.search_button.pack(anchor='w', padx=12, pady=5)
 
         # Edit button  
-        self.edit_button = tk.Button(root, text="Edit", command=self.edit_records, bg='#B2AC88', font=custom_font)
-        self.edit_button.pack(anchor='w', padx=10, pady=5)
+        self.edit_button = tk.Button(root, text="Edit Record", command=self.edit_records, bg='#B2AC88', font=custom_font)
+        self.edit_button.pack(anchor='w', padx=12, pady=5)
+
+        # Delete button
+        self.delete_button = tk.Button(root, text="Delete Record", command=self.delete_record, bg='#B2AC88', font=custom_font)
+        self.delete_button.pack(anchor='w', padx=12, pady=5)
 
         # Search entry box
         self.search_entry = tk.Entry(root, font=custom_font)
-        self.search_entry.pack(anchor='w', padx=10, pady=5)
+        self.search_entry.pack(anchor='w', padx=12, pady=5)
 
         # Display for search results
         self.employee_listbox = tk.Listbox(self.root, font=custom_font)
@@ -111,6 +115,7 @@ class App:
                 self.name_entry.delete(0, tk.END)
                 self.name_entry.insert(0, employee_data[1])
                 print(employee_data[1])
+                print(employee_id)
 
                 self.start_date_entry.delete(0, tk.END)
                 self.start_date_entry.insert(0, employee_data[2])
@@ -124,6 +129,8 @@ class App:
                 print(employee_data[4])
 
                 self.check_var.set(employee_data[5])
+
+                self.employee_id = employee_id
         except sqlite3.Error as e:
             print(f"An error occurred: {e}")
 
@@ -139,12 +146,33 @@ class App:
                 rows = cur.fetchall()
                 for row in rows:
                     self.employee_listbox.insert(tk.END, row)
+                    print(self.employee_id)
             if rows:
                 self.employee_listbox.pack(anchor='w', padx=10, pady=10)  # Show the Listbox
             else:
                 self.employee_listbox.pack_forget()  # Hide the Listbox if no results
         except sqlite3.Error as e:
             print(f"An error occurred: {e}")
+
+    def delete_record(self):
+        selection = self.employee_listbox.curselection()
+        if not selection:
+            print("No item selected")
+            return
+
+        selected_index = selection[0]
+        selected_item = self.employee_listbox.get(selected_index)
+        employee_index = selected_item[0]
+
+        try:
+            with sqlite3.connect('employee_data.db') as conn:
+                cur = conn.cursor()
+                query = "DELETE FROM employees WHERE id = ?"
+                cur.execute(query, (employee_index,))
+        except sqlite3.Error as e:
+            print(f"An error occurred: {e}")
+        self.refresh_employee_list()
+        print(f"{employee_index} removed")
 
     def refresh_employee_list(self):
         self.employee_listbox.delete(0, tk.END)
@@ -180,18 +208,19 @@ class App:
             conn = sqlite3.connect('employee_data.db')
             cur = conn.cursor()
 
-            if self.current_employee_id is None:
-                cur.execute('''
-                    INSERT INTO employees (name, start_date, title, department, cell_phone_provided)
-                    VALUES (?, ?, ?, ?, ?)
-                ''', (name, start_date, title, department, cell_phone == "Yes"))
-            else:
+            if self.employee_id is not None:
                 cur.execute('''
                 UPDATE employees
                 SET name = ?, start_date = ?, title = ?, department = ?, cell_phone_provided = ?
                 WHERE id = ?
-                '''), (name, start_date, title, department, cell_phone == "Yes", self.current_employee_id)
-                self.current_employee_id = None
+                ''', (name, start_date, title, department, cell_phone == "Yes", self.employee_id))
+                self.employee_id = None
+            else:
+                cur.execute('''
+                        INSERT INTO employees (name, start_date, title, department, cell_phone_provided)
+                        VALUES (?, ?, ?, ?, ?)
+                    ''', (name, start_date, title, department, cell_phone == "Yes"))
+
 
             conn.commit()
         except sqlite3.Error as e:
