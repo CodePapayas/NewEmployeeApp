@@ -25,44 +25,55 @@ class App:
     def __init__(self, root):
         self.root = root
         self.root.title("Employee Onboarding")
-        self.root.geometry("500x500")
-        self.root.configure(bg='#B2AC88')  # Set background color to sage green
+        self.root.geometry("500x800")
         self.employee_id = None  # Set employee ID for search/edit
+        
+        # High-contrast dark theme colors
+        background_color = '#424242'  # Professional Slate
+        text_color = '#FFFFFF'  # White
+        button_color = '#757575'  # Gray
+        entry_bg = '#616161'  # Dark Gray
+        entry_fg = '#FFFFFF'  # White
+
+        self.root.configure(bg=background_color)
 
         # Define a custom font style for the application
-        custom_font = ("Times New Roman", 10)  # Example: Using Times New Roman
+        custom_font = ("Arial", 10)  # Example: Using Arial
+
+        # Style configuration
+        style_config = {'bg': background_color, 'fg': text_color, 'font': custom_font}
 
         # Name Field
-        self.label = tk.Label(self.root, text="Name", bg='#B2AC88', font=custom_font)
+        self.label = tk.Label(self.root, text="Name", **style_config)
         self.label.pack(anchor='w', padx=10, pady=5)
-        self.name_entry = tk.Entry(self.root, font=custom_font)
+        self.name_entry = tk.Entry(self.root, font=custom_font, bg=entry_bg, fg=entry_fg)
         self.name_entry.pack(anchor='w', padx=10, pady=5)
 
         # Start Date Field
-        self.label = tk.Label(self.root, text="Start date", bg='#B2AC88', font=custom_font)
+        self.label = tk.Label(self.root, text="Start date", **style_config)
         self.label.pack(anchor='w', padx=10, pady=5)
-        self.start_date_entry = tk.Entry(self.root, font=custom_font)
+        self.start_date_entry = tk.Entry(self.root, font=custom_font, bg=entry_bg, fg=entry_fg)
         self.start_date_entry.pack(anchor='w', padx=10, pady=5)
 
         # Title Field
-        self.label = tk.Label(self.root, text="Title", bg='#B2AC88', font=custom_font)
+        self.label = tk.Label(self.root, text="Title", **style_config)
         self.label.pack(anchor='w', padx=10, pady=5)
-        self.title_entry = tk.Entry(self.root, font=custom_font)
+        self.title_entry = tk.Entry(self.root, font=custom_font, bg=entry_bg, fg=entry_fg)
         self.title_entry.pack(anchor='w', padx=10, pady=5)
 
         # Department Dropdown
-        self.label = tk.Label(self.root, text="Department", bg='#B2AC88', font=custom_font)
+        self.label = tk.Label(self.root, text="Department", **style_config)
         self.label.pack(anchor='w', padx=10, pady=5)
         self.department_var = tk.StringVar(root)
         self.departments = ["Executive", "Management", "Clinical", "Administrative"]
         self.department_var.set(self.departments[0])
         self.department_menu = tk.OptionMenu(root, self.department_var, *self.departments)
-        self.department_menu.config(bg='#B2AC88', font=custom_font)
+        self.department_menu.config(bg=button_color, fg=text_color, font=custom_font)
         self.department_menu.pack(anchor='w', padx=10, pady=5)
 
         # Checkbox for Company Cell Phone
         self.check_var = tk.IntVar()
-        self.checkbox = tk.Checkbutton(self.root, text="Company cell phone provided?", variable=self.check_var, bg='#B2AC88', font=custom_font)
+        self.checkbox = tk.Checkbutton(self.root, text="Company cell phone provided?", variable=self.check_var, **style_config)
         self.checkbox.pack(anchor='w', padx=10, pady=5)
 
         # Define the onboarding tasks dictionary
@@ -74,28 +85,28 @@ class App:
         }
 
         # Confirm Button
-        self.confirm_button = tk.Button(root, text="Create Record", command=self.confirm, bg='#B2AC88', font=custom_font)
+        self.confirm_button = tk.Button(root, text="Create Record", command=self.confirm, bg=button_color, fg=text_color, font=custom_font)
         self.confirm_button.pack(anchor='w', padx=12, pady=10)
+        
+        # Search entry box
+        self.search_entry = tk.Entry(root, font=custom_font, bg=entry_bg, fg=entry_fg)
+        self.search_entry.pack(anchor='w', padx=12, pady=5)
 
         # Search button
-        self.search_button = tk.Button(root, text="Search Records", command=self.read_records, bg='#B2AC88', font=custom_font)
+        self.search_button = tk.Button(root, text="Search Records", command=self.read_records, bg=button_color, fg=text_color, font=custom_font)
         self.search_button.pack(anchor='w', padx=12, pady=5)
 
+        # Display for search results
+        self.employee_listbox = tk.Listbox(self.root, font=custom_font, bg=entry_bg, fg=entry_fg)
+        self.employee_listbox.pack(anchor='w', padx=25, pady=25)
+        
         # Edit button  
-        self.edit_button = tk.Button(root, text="Edit Record", command=self.edit_records, bg='#B2AC88', font=custom_font)
+        self.edit_button = tk.Button(root, text="Edit Record", command=self.edit_records, bg=button_color, fg=text_color, font=custom_font)
         self.edit_button.pack(anchor='w', padx=12, pady=5)
 
         # Delete button
-        self.delete_button = tk.Button(root, text="Delete Record", command=self.delete_record, bg='#B2AC88', font=custom_font)
+        self.delete_button = tk.Button(root, text="Delete Record", command=self.delete_record, bg=button_color, fg=text_color, font=custom_font)
         self.delete_button.pack(anchor='w', padx=12, pady=5)
-
-        # Search entry box
-        self.search_entry = tk.Entry(root, font=custom_font)
-        self.search_entry.pack(anchor='w', padx=12, pady=5)
-
-        # Display for search results
-        self.employee_listbox = tk.Listbox(self.root, font=custom_font)
-        self.employee_listbox.pack(anchor='w', padx=25, pady=25)
 
     def edit_records(self):
         selected_index = self.employee_listbox.curselection()
